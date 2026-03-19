@@ -11,10 +11,12 @@ systemd service under the `paperclip` system user.
   Tailscale or SSH tunnel only.
 - **`onboard` runs once.** It's guarded by `~/.paperclip/config.json` existence. Never remove
   that guard — re-running onboard is destructive.
-- **Migrations are automatic.** `paperclip run` calls `ensureMigrations()` on startup. No
+- **Migrations are automatic.** `paperclipai run` calls `ensureMigrations()` on startup. No
   separate migrate step needed. Do not add `pnpm db:migrate` tasks.
 - **No git clone.** Install is via `npm install -g paperclipai`. Do not reintroduce a source
   build approach.
+- **Binary is `paperclipai`**, not `paperclip`. The npm package `bin` field is `{"paperclipai": "dist/index.js"}`.
+  Path is resolved dynamically via `npm prefix -g` and stored in the `paperclip_bin` fact.
 
 ## Task order (must not change)
 

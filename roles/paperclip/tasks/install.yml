@@ -6,7 +6,7 @@
 
 - name: Set paperclip binary path fact
   ansible.builtin.set_fact:
-    paperclip_bin: "{{ npm_prefix.stdout | trim }}/bin/paperclip"
+    paperclip_bin: "{{ npm_prefix.stdout | trim }}/bin/paperclipai"
 
 - name: Get current Paperclip version (pre-upgrade)
   ansible.builtin.command: "{{ paperclip_bin }} --version"
