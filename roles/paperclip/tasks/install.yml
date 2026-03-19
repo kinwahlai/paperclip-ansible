@@ -1,16 +1,25 @@
 ---
+- name: Get npm global bin directory
+  ansible.builtin.command: npm prefix -g
+  register: npm_prefix
+  changed_when: false
+
+- name: Set paperclip binary path fact
+  ansible.builtin.set_fact:
+    paperclip_bin: "{{ npm_prefix.stdout | trim }}/bin/paperclip"
+
 - name: Get current Paperclip version (pre-upgrade)
-  ansible.builtin.command: paperclip --version
+  ansible.builtin.command: "{{ paperclip_bin }} --version"
   register: version_before
   failed_when: false
   changed_when: false
 
 - name: Install or upgrade paperclipai globally via npm
   ansible.builtin.command: npm install -g paperclipai
-  changed_when: false  # version comparison below drives changed state
+  changed_when: false
 
-- name: Get current Paperclip version (post-upgrade)
-  ansible.builtin.command: paperclip --version
+- name: Get Paperclip version (post-install)
+  ansible.builtin.command: "{{ paperclip_bin }} --version"
   register: version_after
   changed_when: false
 
@@ -27,13 +36,13 @@
 
 - name: Run Paperclip onboard (first time only)
   ansible.builtin.shell:
-    cmd: paperclip onboard --yes
+    cmd: "{{ paperclip_bin }} onboard --yes"
     executable: /bin/bash
   become: true
   become_user: "{{ paperclip_user }}"
   environment:
     HOME: "{{ paperclip_home }}"
-    PATH: "/usr/local/bin:/usr/bin:/bin"
+    PATH: "{{ npm_prefix.stdout | trim }}/bin:/usr/local/bin:/usr/bin:/bin"
   when:
     - not paperclip_config.stat.exists
     - not ci_test
@@ -43,6 +52,7 @@
   ansible.builtin.debug:
     msg:
       - "Paperclip {{ version_after.stdout }} is ready."
+      - "Binary: {{ paperclip_bin }}"
       - "Data directory: {{ paperclip_home }}/.paperclip/"
       - "API available at: http://127.0.0.1:{{ paperclip_port }}"
       - "Access via Tailscale or SSH tunnel only — port is not exposed externally."

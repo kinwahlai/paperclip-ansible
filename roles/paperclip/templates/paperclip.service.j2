@@ -12,10 +12,10 @@ WorkingDirectory={{ paperclip_home }}
 Environment="NODE_ENV=production"
 Environment="PORT={{ paperclip_port }}"
 Environment="HOME={{ paperclip_home }}"
-Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+Environment="PATH={{ npm_prefix.stdout | trim }}/bin:/usr/local/bin:/usr/bin:/bin"
 
 # Run Paperclip server
-ExecStart=/usr/local/bin/paperclip run
+ExecStart={{ paperclip_bin }} run
 
 # Restart policy
 Restart=on-failure
