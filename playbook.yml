@@ -9,10 +9,10 @@
 #   - Systemd service (auto-start, production mode)
 #
 # Usage:
-#   ansible-playbook playbook.yml --ask-become-pass
+#   ansible-playbook -i inventory playbook.yml --ask-become-pass
 #
 # Development mode (skip DB and service, re-run on changes):
-#   ansible-playbook playbook.yml --ask-become-pass -e ci_test=true
+#   ansible-playbook -i inventory playbook.yml --ask-become-pass -e ci_test=true
 
 - name: Install Paperclip
   hosts: all

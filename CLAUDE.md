@@ -41,7 +41,7 @@ handler only when the version changes. The service restart triggers auto-migrati
 ## Before committing any change
 
 ```bash
-ansible-playbook playbook.yml --syntax-check
+ansible-playbook -i inventory playbook.yml --syntax-check
 ansible-lint playbook.yml
 ```
 

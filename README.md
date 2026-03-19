@@ -36,7 +36,7 @@ cd paperclip-ansible
 ansible-galaxy collection install -r requirements.yml
 
 # Run installation
-ansible-playbook playbook.yml --ask-become-pass
+ansible-playbook -i inventory playbook.yml --ask-become-pass
 ```
 
 ## What Gets Installed
@@ -78,7 +78,7 @@ Re-run the playbook. It will upgrade the binary, and restart the service only if
 Database migrations apply automatically on startup.
 
 ```bash
-ansible-playbook playbook.yml --ask-become-pass
+ansible-playbook -i inventory playbook.yml --ask-become-pass
 ```
 
 ## Configuration
@@ -98,7 +98,7 @@ Override variables via command line or a vars file.
 ### Via command line
 
 ```bash
-ansible-playbook playbook.yml --ask-become-pass \
+ansible-playbook -i inventory playbook.yml --ask-become-pass \
   -e "paperclip_ssh_keys=['ssh-ed25519 AAAAC3... user@host']"
 ```
 
@@ -110,7 +110,7 @@ paperclip_ssh_keys:
   - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGxxxxxxxx user@host"
 EOF
 
-ansible-playbook playbook.yml --ask-become-pass -e @vars.yml
+ansible-playbook -i inventory playbook.yml --ask-become-pass -e @vars.yml
 ```
 
 ## Security
