@@ -29,30 +29,10 @@
   changed_when: version_before.stdout | default('') != version_after.stdout
   notify: Restart paperclip
 
-- name: Check if Paperclip is already configured
-  ansible.builtin.stat:
-    path: "{{ paperclip_home }}/.paperclip/config.json"
-  register: paperclip_config
-
-- name: Run Paperclip onboard (first time only)
-  ansible.builtin.shell:
-    cmd: "{{ paperclip_bin }} onboard --yes"
-    executable: /bin/bash
-  become: true
-  become_user: "{{ paperclip_user }}"
-  environment:
-    HOME: "{{ paperclip_home }}"
-    PATH: "{{ npm_prefix.stdout | trim }}/bin:/usr/local/bin:/usr/bin:/bin"
-  when:
-    - not paperclip_config.stat.exists
-    - not ci_test
-  changed_when: true
-
 - name: Display post-install note
   ansible.builtin.debug:
     msg:
-      - "Paperclip {{ version_after.stdout }} is ready."
+      - "Paperclip {{ version_after.stdout }} installed."
       - "Binary: {{ paperclip_bin }}"
-      - "Data directory: {{ paperclip_home }}/.paperclip/"
-      - "API available at: http://127.0.0.1:{{ paperclip_port }}"
-      - "Access via Tailscale or SSH tunnel only — port is not exposed externally."
+      - "paperclipai run will bootstrap config, DB, and keys on first start."
+      - "API will be available at: http://127.0.0.1:{{ paperclip_port }}"

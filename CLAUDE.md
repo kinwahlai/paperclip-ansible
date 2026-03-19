@@ -9,8 +9,8 @@ systemd service under the `paperclip` system user.
 
 - **Port 3100 is localhost-only.** Never add UFW rules to expose it externally. Access is via
   Tailscale or SSH tunnel only.
-- **`onboard` runs once.** It's guarded by `~/.paperclip/config.json` existence. Never remove
-  that guard — re-running onboard is destructive.
+- **No `onboard`.** `paperclipai run` self-bootstraps on first start (config, DB, keys).
+  `onboard --yes` starts the server as a foreground process and hangs Ansible — do not use it.
 - **Migrations are automatic.** `paperclipai run` calls `ensureMigrations()` on startup. No
   separate migrate step needed. Do not add `pnpm db:migrate` tasks.
 - **No git clone.** Install is via `npm install -g paperclipai`. Do not reintroduce a source
