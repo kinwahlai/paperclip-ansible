@@ -9,7 +9,7 @@ that manages multiple AI agents as an autonomous organization.
 ## Key Principles
 
 1. **Localhost only**: Port 3100 binds to 127.0.0.1. Access via Tailscale or SSH tunnel only.
-2. **Production mode**: Always install from source (`pnpm build`), run compiled output.
+2. **npm install**: Both opencode-ai and paperclipai are installed via `npm install -g`. No git clone or source build.
 3. **Non-root**: Paperclip runs as the `paperclip` system user with scoped sudo.
 4. **Idempotent**: All tasks must be safe to run multiple times.
 
@@ -19,20 +19,19 @@ that manages multiple AI agents as an autonomous organization.
 roles/paperclip/tasks/main.yml:
   nodejs.yml   → Install Node.js 22.x + pnpm (system-wide)
   user.yml     → Create paperclip user, sudoers, SSH keys
-  install.yml  → git clone/pull, pnpm install, pnpm build, db:migrate
+  install.yml  → npm install -g opencode-ai, deploy opencode config, npm install -g paperclipai
   service.yml  → Deploy + enable systemd service (skipped in ci_test mode)
 ```
 
 ## Critical Notes
 
-### ExecStart in paperclip.service.j2
-The service runs `node dist/index.js` from `{{ paperclip_repo_dir }}/server`.
-This assumes the server package compiles to `server/dist/index.js` after `pnpm build`.
-Verify this path against the actual repo structure before deploying.
+### Binary name
+The installed binary is `paperclipai` (not `paperclip`). Its path is resolved dynamically
+via `npm prefix -g` and stored in the `paperclip_bin` fact.
 
 ### Database Migrations
-`pnpm db:migrate` is run on every install/update. Migrations must be idempotent —
-this is guaranteed by Paperclip's migration framework (Drizzle ORM).
+Migrations run automatically when `paperclipai run` starts (`ensureMigrations()`).
+No separate migrate step is needed — do not add `pnpm db:migrate` tasks.
 
 ### No UFW changes
 Unlike openclaw-ansible, this playbook makes no UFW changes. Port 3100 is
@@ -70,7 +69,9 @@ bash tests/run-tests.sh
 
 ### Host System
 ```
-/home/paperclip/paperclip/     # Cloned repo + built app
+/usr/local/bin/paperclipai                        # installed binary
+/home/paperclip/.paperclip/                       # config, DB, keys, storage
+/home/paperclip/.config/opencode/opencode.json    # opencode config (if api key set)
 /etc/systemd/system/paperclip.service
 /etc/sudoers.d/paperclip
 ```
@@ -85,7 +86,8 @@ roles/paperclip/
 │   ├── install.yml
 │   └── service.yml
 ├── templates/
-│   └── paperclip.service.j2
+│   ├── paperclip.service.j2
+│   └── opencode.json.j2
 ├── defaults/
 │   └── main.yml
 └── handlers/
@@ -95,8 +97,8 @@ roles/paperclip/
 ## Making Changes
 
 ### Updating Paperclip
-Re-run the playbook — it will `git pull`, `pnpm install`, `pnpm build`,
-run migrations, and restart the service automatically.
+Re-run the playbook — it will reinstall via `npm install -g paperclipai`,
+and restart the service only if the version changed. Migrations apply automatically on startup.
 
 ### Changing the Port
 Override `paperclip_port` variable. The service template and docs reference

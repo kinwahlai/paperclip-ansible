@@ -41,11 +41,12 @@ ansible-playbook -i inventory playbook.yml --ask-become-pass
 
 ## What Gets Installed
 
-- Node.js 22.x
-- Paperclip (`npm install -g paperclipai`)
+- Node.js 22.x + pnpm
+- OpenCode (`npm install -g opencode-ai`) — AI coding assistant
+- Paperclip (`npm install -g paperclipai`) — AI agent orchestration platform
 - `paperclip` system user with scoped sudoers
-- First-time setup via `paperclip onboard --yes` (config, embedded Postgres, encryption keys)
-- Systemd service (`paperclip run`) with auto-start and restart on failure
+- Systemd service (`paperclipai run`) with auto-start and restart on failure
+- Config, database, and encryption keys bootstrapped automatically on first start
 
 ## Post-Install
 
@@ -94,11 +95,13 @@ Override variables via command line or a vars file.
 | `paperclip_port` | `3100` | API server port (localhost-only) |
 | `nodejs_version` | `22.x` | Node.js version to install |
 | `paperclip_ssh_keys` | `[]` | SSH public keys for the paperclip user |
+| `opencode_api_key` | `""` | Alibaba Cloud Coding Plan API key (`sk-sp-xxx`) for OpenCode |
 
 ### Via command line
 
 ```bash
 ansible-playbook -i inventory playbook.yml --ask-become-pass \
+  -e "opencode_api_key=sk-sp-xxx" \
   -e "paperclip_ssh_keys=['ssh-ed25519 AAAAC3... user@host']"
 ```
 
@@ -106,12 +109,17 @@ ansible-playbook -i inventory playbook.yml --ask-become-pass \
 
 ```bash
 cat > vars.yml << EOF
+opencode_api_key: "sk-sp-xxx"
 paperclip_ssh_keys:
   - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGxxxxxxxx user@host"
 EOF
 
 ansible-playbook -i inventory playbook.yml --ask-become-pass -e @vars.yml
 ```
+
+> **Note**: If `opencode_api_key` is set, OpenCode is configured with the
+> [Alibaba Cloud Coding Plan](https://www.alibabacloud.com/help/en/model-studio/opencode-coding-plan)
+> provider at `~/.config/opencode/opencode.json`.
 
 ## Security
 
