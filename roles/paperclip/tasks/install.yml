@@ -14,6 +14,10 @@
   failed_when: false
   changed_when: false
 
+- name: Install or upgrade opencode-ai globally via npm
+  ansible.builtin.command: npm install -g opencode-ai
+  changed_when: false
+
 - name: Install or upgrade paperclipai globally via npm
   ansible.builtin.command: npm install -g paperclipai
   changed_when: false
