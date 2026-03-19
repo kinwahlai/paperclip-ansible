@@ -1,0 +1,21 @@
+---
+# Paperclip AI Agent Orchestration — Installer
+#
+# Installs Paperclip on Debian/Ubuntu Linux:
+#   - Node.js 22.x + pnpm
+#   - paperclip system user with scoped sudo
+#   - Paperclip app (git clone + build)
+#   - Database migrations (embedded Postgres)
+#   - Systemd service (auto-start, production mode)
+#
+# Usage:
+#   ansible-playbook playbook.yml --ask-become-pass
+#
+# Development mode (skip DB and service, re-run on changes):
+#   ansible-playbook playbook.yml --ask-become-pass -e ci_test=true
+
+- name: Install Paperclip
+  hosts: all
+  become: true
+  roles:
+    - paperclip

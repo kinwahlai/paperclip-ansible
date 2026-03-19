@@ -1,0 +1,75 @@
+---
+- name: Create paperclip system user
+  ansible.builtin.user:
+    name: "{{ paperclip_user }}"
+    comment: "Paperclip Service User"
+    system: true
+    shell: /bin/bash
+    create_home: true
+    home: "{{ paperclip_home }}"
+    state: present
+
+- name: Ensure paperclip home directory has correct ownership
+  ansible.builtin.file:
+    path: "{{ paperclip_home }}"
+    owner: "{{ paperclip_user }}"
+    group: "{{ paperclip_user }}"
+    state: directory
+    mode: '0755'
+
+- name: Configure PATH in .bashrc for paperclip user
+  ansible.builtin.blockinfile:
+    path: "{{ paperclip_home }}/.bashrc"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - paperclip config"
+    block: |
+      export PATH="/usr/local/bin:$PATH"
+    create: true
+    owner: "{{ paperclip_user }}"
+    group: "{{ paperclip_user }}"
+    mode: '0644'
+
+- name: Create .bash_profile to source .bashrc for login shells
+  ansible.builtin.copy:
+    dest: "{{ paperclip_home }}/.bash_profile"
+    owner: "{{ paperclip_user }}"
+    group: "{{ paperclip_user }}"
+    mode: '0644'
+    content: |
+      # .bash_profile - Executed for login shells
+      if [ -f ~/.bashrc ]; then
+          . ~/.bashrc
+      fi
+
+- name: Add paperclip user to sudoers with scoped NOPASSWD
+  ansible.builtin.copy:
+    dest: "/etc/sudoers.d/{{ paperclip_user }}"
+    mode: '0440'
+    owner: root
+    group: root
+    content: |
+      # Paperclip sudo permissions (scoped for security)
+      {{ paperclip_user }} ALL=(ALL) NOPASSWD: /usr/bin/systemctl start paperclip
+      {{ paperclip_user }} ALL=(ALL) NOPASSWD: /usr/bin/systemctl stop paperclip
+      {{ paperclip_user }} ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart paperclip
+      {{ paperclip_user }} ALL=(ALL) NOPASSWD: /usr/bin/systemctl status paperclip
+      {{ paperclip_user }} ALL=(ALL) NOPASSWD: /usr/bin/systemctl enable paperclip
+      {{ paperclip_user }} ALL=(ALL) NOPASSWD: /usr/bin/systemctl disable paperclip
+      {{ paperclip_user }} ALL=(ALL) NOPASSWD: /usr/bin/systemctl daemon-reload
+      {{ paperclip_user }} ALL=(ALL) NOPASSWD: /usr/bin/journalctl -u paperclip *
+    validate: /usr/sbin/visudo -cf %s
+
+- name: Create .ssh directory for paperclip user
+  ansible.builtin.file:
+    path: "{{ paperclip_home }}/.ssh"
+    state: directory
+    owner: "{{ paperclip_user }}"
+    group: "{{ paperclip_user }}"
+    mode: '0700'
+
+- name: Add SSH authorized keys for paperclip user
+  ansible.posix.authorized_key:
+    user: "{{ paperclip_user }}"
+    state: present
+    key: "{{ item }}"
+  loop: "{{ paperclip_ssh_keys }}"
+  when: paperclip_ssh_keys | length > 0

@@ -1,0 +1,19 @@
+---
+# CI testing mode - skips onboard and systemd tasks
+ci_test: false
+
+# Node.js version (Paperclip requires 20+)
+nodejs_version: "22.x"
+
+# Paperclip system user
+paperclip_user: paperclip
+paperclip_home: /home/paperclip
+
+# API server port (localhost-only — access via Tailscale or SSH tunnel)
+paperclip_port: 3100
+
+# SSH keys for paperclip user (optional — for direct SSH access)
+# Example:
+#   paperclip_ssh_keys:
+#     - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGxxxxxxxx user@host"
+paperclip_ssh_keys: []

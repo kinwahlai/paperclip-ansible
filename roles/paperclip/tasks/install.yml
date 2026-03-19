@@ -1,0 +1,48 @@
+---
+- name: Get current Paperclip version (pre-upgrade)
+  ansible.builtin.command: paperclip --version
+  register: version_before
+  failed_when: false
+  changed_when: false
+
+- name: Install or upgrade paperclipai globally via npm
+  ansible.builtin.command: npm install -g paperclipai
+  changed_when: false  # version comparison below drives changed state
+
+- name: Get current Paperclip version (post-upgrade)
+  ansible.builtin.command: paperclip --version
+  register: version_after
+  changed_when: false
+
+- name: Notify service restart if version changed
+  ansible.builtin.debug:
+    msg: "Paperclip upgraded: {{ version_before.stdout | default('none') }} → {{ version_after.stdout }}"
+  changed_when: version_before.stdout | default('') != version_after.stdout
+  notify: Restart paperclip
+
+- name: Check if Paperclip is already configured
+  ansible.builtin.stat:
+    path: "{{ paperclip_home }}/.paperclip/config.json"
+  register: paperclip_config
+
+- name: Run Paperclip onboard (first time only)
+  ansible.builtin.shell:
+    cmd: paperclip onboard --yes
+    executable: /bin/bash
+  become: true
+  become_user: "{{ paperclip_user }}"
+  environment:
+    HOME: "{{ paperclip_home }}"
+    PATH: "/usr/local/bin:/usr/bin:/bin"
+  when:
+    - not paperclip_config.stat.exists
+    - not ci_test
+  changed_when: true
+
+- name: Display post-install note
+  ansible.builtin.debug:
+    msg:
+      - "Paperclip {{ version_after.stdout }} is ready."
+      - "Data directory: {{ paperclip_home }}/.paperclip/"
+      - "API available at: http://127.0.0.1:{{ paperclip_port }}"
+      - "Access via Tailscale or SSH tunnel only — port is not exposed externally."

@@ -1,0 +1,41 @@
+---
+# Verification playbook — checks that the install produced expected system state.
+# Run after playbook.yml via tests/entrypoint.sh.
+
+- name: Verify Paperclip installation
+  hosts: all
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Verify paperclip user exists
+      ansible.builtin.command: id paperclip
+      changed_when: false
+
+    - name: Verify Node.js is installed
+      ansible.builtin.command: node --version
+      changed_when: false
+
+    - name: Verify pnpm is installed
+      ansible.builtin.command: pnpm --version
+      changed_when: false
+
+    - name: Verify paperclip sudoers file exists
+      ansible.builtin.stat:
+        path: /etc/sudoers.d/paperclip
+      register: sudoers_stat
+
+    - name: Assert sudoers file is present
+      ansible.builtin.assert:
+        that: sudoers_stat.stat.exists
+        fail_msg: "/etc/sudoers.d/paperclip is missing"
+
+    - name: Verify paperclip repo directory exists
+      ansible.builtin.stat:
+        path: /home/paperclip/paperclip
+      register: repo_stat
+
+    - name: Assert repo directory exists
+      ansible.builtin.assert:
+        that: repo_stat.stat.exists
+        fail_msg: "Paperclip repo directory not found"

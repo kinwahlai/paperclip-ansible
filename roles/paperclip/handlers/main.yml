@@ -1,0 +1,6 @@
+---
+- name: Restart paperclip
+  ansible.builtin.systemd:
+    name: paperclip
+    state: restarted
+    daemon_reload: true
