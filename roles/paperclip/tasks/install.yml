@@ -18,6 +18,24 @@
   ansible.builtin.command: npm install -g opencode-ai
   changed_when: false
 
+- name: Create opencode config directory
+  ansible.builtin.file:
+    path: "{{ paperclip_home }}/.config/opencode"
+    state: directory
+    owner: "{{ paperclip_user }}"
+    group: "{{ paperclip_user }}"
+    mode: '0700'
+  when: opencode_api_key | length > 0
+
+- name: Deploy opencode config
+  ansible.builtin.template:
+    src: opencode.json.j2
+    dest: "{{ paperclip_home }}/.config/opencode/opencode.json"
+    owner: "{{ paperclip_user }}"
+    group: "{{ paperclip_user }}"
+    mode: '0600'
+  when: opencode_api_key | length > 0
+
 - name: Install or upgrade paperclipai globally via npm
   ansible.builtin.command: npm install -g paperclipai
   changed_when: false

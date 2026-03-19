@@ -12,6 +12,9 @@ paperclip_home: /home/paperclip
 # API server port (localhost-only — access via Tailscale or SSH tunnel)
 paperclip_port: 3100
 
+# Alibaba Cloud Coding Plan API key for opencode (format: sk-sp-xxx)
+opencode_api_key: ""
+
 # SSH keys for paperclip user (optional — for direct SSH access)
 # Example:
 #   paperclip_ssh_keys:
