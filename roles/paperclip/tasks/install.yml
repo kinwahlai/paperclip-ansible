@@ -18,6 +18,10 @@
   ansible.builtin.command: npm install -g opencode-ai
   changed_when: false
 
+- name: Pre-install opencode npm provider packages globally
+  ansible.builtin.command: npm install -g @ai-sdk/anthropic
+  changed_when: false
+
 - name: Create opencode config directory
   ansible.builtin.file:
     path: "{{ paperclip_home }}/.config/opencode"
