@@ -13,7 +13,7 @@
 
 - name: Configure paperclip on tailscale serve port {{ paperclip_tailscale_https_port }}
   ansible.builtin.command: >
-    tailscale serve --bg https:{{ paperclip_tailscale_https_port }} /
+    tailscale serve --bg --https {{ paperclip_tailscale_https_port }}
     http://127.0.0.1:{{ paperclip_port }}
   changed_when: true
   when: tailscale_check.rc == 0
