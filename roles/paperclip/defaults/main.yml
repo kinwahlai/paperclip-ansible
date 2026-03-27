@@ -20,3 +20,10 @@ opencode_api_key: ""
 #   paperclip_ssh_keys:
 #     - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGxxxxxxxx user@host"
 paperclip_ssh_keys: []
+
+# Tailscale serve — expose paperclip at a dedicated HTTPS port on the tailnet.
+# Uses a separate port (not /) to avoid conflicting with openclaw gateway which
+# owns the root https:443 endpoint via tailscale serve.
+# Set to false to skip tailscale configuration.
+paperclip_tailscale_enable: true
+paperclip_tailscale_https_port: 8443

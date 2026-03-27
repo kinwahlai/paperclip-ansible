@@ -11,3 +11,7 @@
 - name: Include systemd service tasks
   ansible.builtin.include_tasks: service.yml
   when: not ci_test
+
+- name: Include tailscale serve tasks
+  ansible.builtin.include_tasks: tailscale.yml
+  when: not ci_test and paperclip_tailscale_enable
